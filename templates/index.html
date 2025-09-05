@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Travel Genie - Your Perfect Trip Awaits</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-magic"></i>
+                <span>Travel Genie</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#destinations" class="nav-link">Destinations</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Discover Your Perfect <span class="highlight">Adventure</span></h1>
+                <p class="hero-subtitle">AI-powered travel planning that creates personalized itineraries just for you</p>
+            </div>
+            
+            <!-- Search Form -->
+            <div class="search-form-container">
+                <form id="travel-form" class="search-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label><i class="fas fa-heart"></i> Travel Mood</label>
+                            <select id="mood" name="mood">
+                                <option value="relaxing">🏖️ Relaxing Beach</option>
+                                <option value="adventurous">🏔️ Adventure & Nature</option>
+                                <option value="cultural">🏛️ Culture & History</option>
+                                <option value="foodie">🍽️ Food & Wine</option>
+                                <option value="romantic">💖 Romantic Getaway</option>
+                                <option value="family">👨‍👩‍👧‍👦 Family Fun</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> From</label>
+                            <input type="text" id="origin_city" name="origin_city" placeholder="Your city" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-alt"></i> Travel Dates</label>
+                            <input type="date" id="departure_date" name="departure_date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Duration</label>
+                            <select id="duration" name="duration">
+                                <option value="1">1 Day</option>
+                                <option value="2">2 Days</option>
+                                <option value="3">3 Days</option>
+                                <option value="5" selected>5 Days</option>
+                                <option value="7">1 Week</option>
+                                <option value="10">10 Days</option>
+                                <option value="14">2 Weeks</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-users"></i> Travel Style</label>
+                            <select id="travel_style" name="travel_style">
+                                <option value="solo">🧳 Solo Traveler</option>
+                                <option value="couple">💕 Couple</option>
+                                <option value="family">👨‍👩‍👧‍👦 Family</option>
+                                <option value="friends">👥 Friends</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-plane"></i> Travel Means</label>
+                            <select id="travel_means" name="travel_means">
+                                <option value="flight">✈️ Flight</option>
+                                <option value="train">🚂 Train</option>
+                                <option value="bus">🚌 Bus</option>
+                                <option value="car">🚗 Car</option>
+                                <option value="any">🤷 Any</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-bed"></i> Hotel Preference</label>
+                            <select id="hotel_preference" name="hotel_preference">
+                                <option value="budget">💰 Budget</option>
+                                <option value="mid-range">⭐ Mid-Range</option>
+                                <option value="luxury">🏆 Luxury</option>
+                                <option value="boutique">🏨 Boutique</option>
+                                <option value="any">🤷 Any</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-dollar-sign"></i> Budget</label>
+                            <div class="budget-container">
+                                <input type="range" id="budget" name="budget" min="200" max="10000" step="100" value="1500">
+                                <span id="budget-value">$1,500</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-magic"></i>
+                            Generate My Trip
+                        </button>
+                        <button type="button" id="surprise-btn" class="btn-secondary">
+                            <i class="fas fa-dice"></i>
+                            Surprise Me!
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results" class="results-section" style="display: none;">
+        <div class="results-container">
+            <!-- Destination Card -->
+            <div class="destination-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-map-pin"></i> Your Perfect Destination</h2>
+                </div>
+                <div class="destination-info">
+                    <h3 id="destination-name">Loading...</h3>
+                    <p id="destination-description">Getting your personalized recommendation...</p>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Itinerary -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-route"></i> Your Itinerary</h3>
+                    </div>
+                    <div class="card-content" id="itinerary-content">
+                        <div class="loading">Creating your perfect itinerary...</div>
+                    </div>
+                </div>
+
+                <!-- Local Cuisine -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-utensils"></i> Local Cuisine</h3>
+                    </div>
+                    <div class="card-content" id="cuisine-content">
+                        <div class="loading">Discovering local flavors...</div>
+                    </div>
+                </div>
+
+                <!-- Cost Breakdown -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calculator"></i> Cost Breakdown</h3>
+                    </div>
+                    <div class="card-content" id="cost-content">
+                        <div class="loading">Calculating your budget...</div>
+                    </div>
+                </div>
+
+                <!-- Best Time & Packing -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-check"></i> Best Time & Packing</h3>
+                    </div>
+                    <div class="card-content" id="timing-content">
+                        <div class="loading">Planning your timing...</div>
+                    </div>
+                </div>
+
+                <!-- Weather Forecast -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cloud-sun"></i> Weather Forecast</h3>
+                    </div>
+                    <div class="card-content" id="weather-content">
+                        <div class="loading">Checking weather conditions...</div>
+                    </div>
+                </div>
+
+                <!-- Flight Options -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-plane"></i> Flight Options</h3>
+                    </div>
+                    <div class="card-content" id="flights-content">
+                        <div class="loading">Finding the best flights...</div>
+                    </div>
+                </div>
+
+                <!-- Hotel Options -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bed"></i> Hotel Options</h3>
+                    </div>
+                    <div class="card-content" id="hotels-content">
+                        <div class="loading">Searching top hotels...</div>
+                    </div>
+                </div>
+
+                <!-- Interactive Map -->
+                <div class="content-card map-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-map"></i> Explore Your Destination</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="map" class="map-container">
+                            <div class="map-placeholder">
+                                <i class="fas fa-map-marked-alt"></i>
+                                <p>Interactive map will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="save-itinerary" class="btn-success">
+                    <i class="fas fa-save"></i>
+                    Save Itinerary
+                </button>
+                <button id="share-itinerary" class="btn-info">
+                    <i class="fas fa-share"></i>
+                    Share Trip
+                </button>
+                <button id="new-search" class="btn-outline">
+                    <i class="fas fa-search"></i>
+                    Plan Another Trip
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose Travel Genie?</h2>
+                <p>Experience the future of travel planning</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI-Powered</h3>
+                    <p>Advanced AI analyzes your preferences to create the perfect itinerary</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Instant Results</h3>
+                    <p>Get your complete travel plan in seconds, not hours</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h3>Budget Optimized</h3>
+                    <p>Smart recommendations that fit your budget perfectly</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Global Coverage</h3>
+                    <p>Access to destinations and services worldwide</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Travel Genie</h3>
+                    <p>Your AI-powered travel companion for unforgettable adventures.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#destinations">Destinations</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> hello@travelgenie.ai</p>
+                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Travel Genie. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let map;
+        let marker;
+
+        // Initialize Google Maps
+        function initMap() {
+            console.log('Google Maps initialized');
+        }
+
+        // Budget slider
+        const budgetSlider = document.getElementById('budget');
+        const budgetValue = document.getElementById('budget-value');
+        
+        budgetSlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            budgetValue.textContent = '$' + value.toLocaleString();
+        });
+
+        // Form submission
+        document.getElementById('travel-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Planning Your Trip...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/generate_itinerary', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    displayResults(data);
+                    document.getElementById('results').style.display = 'block';
+                    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showError(data.error || 'Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Surprise me button
+        document.getElementById('surprise-btn').addEventListener('click', async function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Surprising You...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/surprise_destination', {
+                    method: 'POST'
+                });
+                
+                console.log('Surprise response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Surprise response data:', data);
+                
+                if (data.success) {
+                    displayResults(data);
+                    document.getElementById('results').style.display = 'block';
+                    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showError(data.error || 'Surprise failed! Please try again.');
+                }
+            } catch (error) {
+                console.error('Surprise error:', error);
+                showError('Network error. Please try again.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Display results
+        function displayResults(data) {
+            console.log('Displaying results:', data);
+            
+            try {
+                // Destination
+                document.getElementById('destination-name').textContent = data.destination || 'Amazing Destination';
+                document.getElementById('destination-description').textContent = data.description || 'Your perfect getaway awaits!';
+
+                // Itinerary
+                document.getElementById('itinerary-content').innerHTML = formatItinerary(data.itinerary);
+
+                // Cuisine
+                document.getElementById('cuisine-content').innerHTML = formatCuisine(data.cuisine);
+
+                // Cost
+                document.getElementById('cost-content').innerHTML = formatCost(data.estimated_cost);
+
+                // Timing
+                const timingContent = `
+                    <div class="timing-info">
+                        <div class="timing-item">
+                            <strong>Best Time to Visit:</strong>
+                            <p>${formatText(data.best_time_to_visit)}</p>
+                        </div>
+                        <div class="timing-item">
+                            <strong>Packing Tips:</strong>
+                            <p>${formatPackingTips(data.packing_tips)}</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('timing-content').innerHTML = timingContent;
+
+                // Weather
+                document.getElementById('weather-content').innerHTML = formatWeather(data.weather_forecast);
+
+                // Flights
+                document.getElementById('flights-content').innerHTML = formatFlights(data.flight_options);
+
+                // Hotels
+                document.getElementById('hotels-content').innerHTML = formatHotels(data.hotel_options);
+
+                // Initialize map
+                if (data.destination) {
+                    initializeMap(data.destination);
+                }
+            } catch (error) {
+                console.error('Error displaying results:', error);
+                showError('Error displaying results. Please try again.');
+            }
+        }
+
+        // Format itinerary
+        function formatItinerary(itinerary) {
+            if (!itinerary) return '<p>Itinerary not available</p>';
+            
+            if (typeof itinerary === 'string') {
+                // Split by lines and format
+                const lines = itinerary.split('\n').filter(line => line.trim());
+                let html = '<div class="itinerary-list">';
+                
+                lines.forEach((line, index) => {
+                    if (line.trim()) {
+                        html += `<div class="itinerary-day">
+                            <div class="day-number">${index + 1}</div> <!-- Only number in the circle -->
+                            <div class="day-content">${line.trim()}</div>
+                        </div>`;
+                    }
+                });
+                
+                html += '</div>';
+                return html;
+            }
+            
+            return '<p>Itinerary not available</p>';
+        }
+
+        // Format cuisine
+        function formatCuisine(cuisine) {
+            if (!cuisine) return '<p>Cuisine information not available</p>';
+            
+            if (typeof cuisine === 'string') {
+                const lines = cuisine.split('\n').filter(line => line.trim());
+                let html = '<div class="cuisine-list">';
+                
+                lines.forEach((line, index) => {
+                    if (line.trim()) {
+                        html += `<div class="cuisine-item">
+                            <div class="cuisine-number">${index + 1}</div>
+                            <div class="cuisine-content">${line.trim()}</div>
+                        </div>`;
+                    }
+                });
+                
+                html += '</div>';
+                return html;
+            }
+            
+            return '<p>Cuisine information not available</p>';
+        }
+
+        // Format cost - Enhanced to handle nested objects and cleaner display
+        function formatCost(cost) {
+            if (!cost || typeof cost !== 'object') {
+                return '<p>Cost information not available</p>';
+            }
+            
+            let html = '<div class="cost-breakdown">';
+            for (const [key, value] of Object.entries(cost)) {
+                let formattedValue = '';
+                if (typeof value === 'object') {
+                    // If the value is another object, iterate through its properties
+                    formattedValue += '<div class="nested-cost-items">';
+                    for (const [subKey, subValue] of Object.entries(value)) {
+                        formattedValue += `<div class="cost-sub-item">
+                            <span class="cost-sub-label">${subKey}:</span>
+                            <span class="cost-sub-value">${formatText(subValue)}</span>
+                        </div>`;
+                    }
+                    formattedValue += '</div>';
+                } else {
+                    formattedValue = formatText(value);
+                }
+
+                html += `<div class="cost-item">
+                    <div class="cost-label">${key}:</div>
+                    <div class="cost-value">${formattedValue}</div>
+                </div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // Format text
+        function formatText(text) {
+            if (!text) return 'Information not available';
+            return String(text).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+
+        // Format packing tips
+        function formatPackingTips(tips) {
+            if (!tips) return 'Packing tips not available';
+            
+            if (typeof tips === 'string') {
+                const lines = tips.split('\n').filter(line => line.trim());
+                let html = '<div class="packing-list">';
+                
+                lines.forEach((line, index) => {
+                    if (line.trim()) {
+                        html += `<div class="packing-item">
+                            <i class="fas fa-check"></i>
+                            <span>${line.trim()}</span>
+                        </div>`;
+                    }
+                });
+                
+                html += '</div>';
+                return html;
+            }
+            
+            return tips;
+        }
+
+        // Format weather
+        function formatWeather(weather) {
+            if (!weather || !Array.isArray(weather)) {
+                return '<p>Weather information not available</p>';
+            }
+            
+            return weather.map(day => `
+                <div class="weather-day">
+                    <div class="weather-date">${formatDate(day.date)}</div>
+                    <div class="weather-icon">
+                        <img src="https://openweathermap.org/img/wn/${day.icon}@2x.png" alt="${day.description}">
+                    </div>
+                    <div class="weather-temp">${day.temperature}°C</div>
+                    <div class="weather-desc">${day.description}</div>
+                </div>
+            `).join('');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Format flights
+        function formatFlights(flights) {
+            if (!flights || !Array.isArray(flights)) {
+                return '<p>Flight information not available</p>';
+            }
+            
+            return flights.map(flight => `
+                <div class="flight-item">
+                    <div class="flight-header">
+                        <div class="flight-airline">${flight.airline}</div>
+                        <div class="flight-price">${flight.price}</div>
+                    </div>
+                    <div class="flight-route">${flight.route}</div>
+                    <div class="flight-dates">
+                        <span>Depart: ${flight.departure}</span>
+                        <span>Return: ${flight.return}</span>
+                    </div>
+                    ${flight.note ? `<div class="flight-note">${flight.note}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Format hotels
+        function formatHotels(hotels) {
+            if (!hotels || !Array.isArray(hotels)) {
+                return '<p>Hotel information not available</p>';
+            }
+            
+            return hotels.map(hotel => `
+                <div class="hotel-item">
+                    <div class="hotel-header">
+                        <div class="hotel-name">${hotel.name}</div>
+                        <div class="hotel-rating">${hotel.rating}</div>
+                    </div>
+                    <div class="hotel-price">${hotel.price}</div>
+                    <div class="hotel-location">📍 ${hotel.location}</div>
+                    ${hotel.amenities ? `<div class="hotel-amenities">${hotel.amenities}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Initialize map
+        function initializeMap(destination) {
+            const mapContainer = document.getElementById('map');
+            
+            // Clear existing content
+            mapContainer.innerHTML = '';
+            
+            // Create map element
+            const mapElement = document.createElement('div');
+            mapElement.id = 'google-map';
+            mapElement.style.width = '100%';
+            mapElement.style.height = '300px';
+            mapContainer.appendChild(mapElement);
+            
+            // Initialize Google Map
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: destination }, function(results, status) {
+                if (status === 'OK') {
+                    const location = results[0].geometry.location;
+                    
+                    map = new google.maps.Map(mapElement, {
+                        zoom: 12,
+                        center: location,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+                    
+                    marker = new google.maps.Marker({
+                        position: location,
+                        map: map,
+                        title: destination
+                    });
+                    
+                    // Add info window
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `<div style="padding: 10px;"><h3>${destination}</h3><p>Your travel destination</p></div>`
+                    });
+                    
+                    marker.addListener('click', function() {
+                        infoWindow.open(map, marker);
+                    });
+                } else {
+                    // Fallback if geocoding fails
+                    mapContainer.innerHTML = `
+                        <div class="map-placeholder">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <p>Map for ${destination}</p>
+                            <small>Interactive map integration coming soon</small>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Show error
+        function showError(message) {
+            console.error('Showing error:', message);
+            alert('Error: ' + message);
+        }
+
+        // New search button
+        document.getElementById('new-search').addEventListener('click', function() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('travel-form').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Save itinerary
+        document.getElementById('save-itinerary').addEventListener('click', function() {
+            alert('Itinerary saved! (Feature coming soon)');
+        });
+
+        // Share itinerary
+        document.getElementById('share-itinerary').addEventListener('click', function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Travel Itinerary',
+                    text: 'Check out my amazing travel plan!',
+                    url: window.location.href
+                });
+            } else {
+                alert('Share feature coming soon!');
+            }
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

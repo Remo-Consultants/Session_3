@@ -1,0 +1,11 @@
+[project]
+name = "travel-genie"
+version = "0.1.0"
+description = "AI-Powered Travel Genie using Flask and Gemini API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=2.3.0",
+    "google-generativeai>=0.3.0",
+    "python-dotenv>=1.0.0"
+]
