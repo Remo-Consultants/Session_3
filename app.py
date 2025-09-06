@@ -537,8 +537,8 @@ def generate_itinerary():
         return jsonify(response_data)
         
     except Exception as e:
-        print(f"Error generating itinerary: {e}")
-        return jsonify({'success': False, 'error': f'Error generating itinerary: {str(e)}'}), 500
+        logging.exception("Error generating itinerary")
+        return jsonify({'success': False, 'error': 'An internal error occurred while generating the itinerary.'}), 500
 
 @app.route('/surprise_destination', methods=['POST'])
 def surprise_destination():
